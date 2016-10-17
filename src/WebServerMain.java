@@ -1,13 +1,10 @@
-import java.net.ServerSocket;
+import java.io.File;
 
-public class WebServerMain implements Runnable{
- 
- 
+public class WebServerMain {
 
  public static void main(String[] args) {
-  String documentRoot = null;
+  File documentRoot = null;
   int port = 0;
-  ServerSocket serverSocket = null;
 
   if (args.length < 2) {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
@@ -20,7 +17,7 @@ public class WebServerMain implements Runnable{
   }
 
   try {
-   documentRoot = args[0];
+   documentRoot = new File(args[0]);
    port = Integer.parseInt(args[1]);
   }
   catch (Exception e) {
@@ -28,24 +25,24 @@ public class WebServerMain implements Runnable{
    System.exit(-1);
   }
   
-  if (port < 1){
+  // check if port is valid
+  if (port < 1 || port > Integer.MAX_VALUE) {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
   
-  try {
-   serverSocket = new ServerSocket(port);
-   serverSocket.setSoTimeout(60000);
+  // check if the string is a valid dir
+  if (!documentRoot.isDirectory()){
+   System.out.println("Usage: java WebServerMain <document_root> <port>"+documentRoot.getPath().toString());
+   System.exit(-1);
   }
-  catch (Exception e){
-   
-  }
+  
+  System.out.println(port);
+  System.out.println(documentRoot.getPath());
+
+  WebServer ws = new WebServer(port);
 
  }
 
- @Override
- public void run() {
-  System.out.println("mooin");
- }
 
 }
