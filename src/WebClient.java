@@ -23,6 +23,7 @@ public class WebClient extends Thread {
  public WebClient(File documentRoot, Socket con) {
   this.documentRoot = documentRoot;
   this.con = con;
+  
   try {
    is = con.getInputStream(); // get data from client on this input stream
    os = con.getOutputStream(); // to send data back to the client on this stream
@@ -54,26 +55,43 @@ public class WebClient extends Thread {
     File path = new File(documentRoot.toString() + request.getResourceName().toString());
     System.out.println(path.toString());
     
-    if (path.exists()) {
-     System.out.println("Path exists: "+path.toString());
+    if (path.exists()) { //.exists()
+     System.out.println("Path exists: " + path.toString());
+     if (path.isFile()) {
+      
+      byte[] webPage = Files.readAllBytes(Paths.get(path.toString()));
+      String webPageSize = "Content-Length: " + webPage.length + "\r\n";
+      String contentType = "Content-Type: " + Files.probeContentType(Paths.get(path.toString())) + "\r\n";
+      os.write("HTTP/1.1 200 OK\r\n".getBytes());
+      os.write("Server: My WebServer\r\n".getBytes());
+      os.write(contentType.getBytes());
+      os.write(webPageSize.getBytes());
+      os.write("\r\n".getBytes());
+      os.write(webPage);
+     }
      
-     byte[] webPage = Files.readAllBytes(Paths.get(path.toString()));
-     String webPageSize = "Content-Length: "+webPage.length+"\r\n";
-     
-     String contentType = "Content-Type: "+Files.probeContentType(Paths.get(path.toString()))+"\r\n";
-     
-     os.write("HTTP/1.1 200 OK\r\n".getBytes());
-     os.write("Server: My WebServer\r\n".getBytes());
-     os.write(contentType.getBytes());
-     os.write(webPageSize.getBytes());
-     os.write("\r\n".getBytes());
-     
-     os.write(webPage);
-     
-
-     
-     
+     // see if that's ok
+     else if (path.isDirectory()){
+      File dirpath = new File(path.toString()+"/index.html");
+      System.out.println(dirpath);
+      if (dirpath.isFile()){
+       byte[] webPage = Files.readAllBytes(Paths.get(dirpath.toString()));
+       String webPageSize = "Content-Length: " + webPage.length + "\r\n";
+       String contentType = "Content-Type: " + Files.probeContentType(Paths.get(dirpath.toString())) + "\r\n";
+       os.write("HTTP/1.1 200 OK\r\n".getBytes());
+       os.write("Server: My WebServer\r\n".getBytes());
+       os.write(contentType.getBytes());
+       os.write(webPageSize.getBytes());
+       os.write("\r\n".getBytes());
+       os.write(webPage);
+      }
+     }
+         
     }
+    
+    
+    
+    
     else {
      String errorMessage = "<html><body><h1>ERROR: 404</h1><p>Path "+request.getResourceName().toString()+" not found.</p></body></html>";
      
