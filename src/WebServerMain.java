@@ -40,7 +40,7 @@ public class WebServerMain {
   System.out.println(port);
   System.out.println(documentRoot.getPath());
 
-  WebServer ws = new WebServer(port);
+  WebServer ws = new WebServer(documentRoot, port);
 
  }
 

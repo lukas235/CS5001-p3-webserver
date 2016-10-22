@@ -1,10 +1,16 @@
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 
 public class WebClient extends Thread {
 
@@ -12,14 +18,16 @@ public class WebClient extends Thread {
  private InputStream is; // get data from client on this input stream 
  private OutputStream os; // can send data back to the client on this output stream
  private BufferedReader br; // use buffered reader to read client data
- private File file;
+ private File documentRoot;
 
- public WebClient(Socket con) {
+ public WebClient(File documentRoot, Socket con) {
+  this.documentRoot = documentRoot;
   this.con = con;
   try {
    is = con.getInputStream(); // get data from client on this input stream
    os = con.getOutputStream(); // to send data back to the client on this stream
    br = new BufferedReader(new InputStreamReader(is)); // use buffered reader to read client data
+   
   }
   catch (IOException ioe) {
    System.out.println("WebClient x: " + ioe.getMessage());
@@ -28,32 +36,61 @@ public class WebClient extends Thread {
 
  private void handle() throws IOException {
   while (true) {
-   String line = br.readLine(); // get data from client over socket
+   Request request = new Request(br.readLine());
+
+   //String line = br.readLine(); // get data from client over socket
 
    // if readLine fails we can deduce here that the connection to the client is broken
    // and shut down the connection on this side cleanly by throwing a DisconnectedException
    // which will be passed up the call stack to the nearest handler (catch block)
    // in the run method
-   if (line == null || line.equals("null") || line.equals("exit")) {
+   if (request.getRequest() == null || request.getRequest().equals("null") || request.getRequest().equals("exit")) {
     System.out.println("puff");
     closeClientConnection();
    }
-   
-//   if (line.substring(0, 3) == "GET "){
-//    try{
-//     file = new File(line.substring(4, line.length()-1));
-//     
-//     if (!file.isFile() || !file.isDirectory()){
-//      Exception e = new Exception();
-//      throw e;
-//     }
-//     
-//    }
-//    catch (Exception e){
-//     os.write("Wrong Path".getBytes());
-//    }
-//    
-//   }
+
+   else if (request.isValidHttp()) {
+    System.out.println("Path: "+request.getResourceName());
+    File path = new File(documentRoot.toString() + request.getResourceName().toString());
+    System.out.println(path.toString());
+    
+    if (path.exists()) {
+     System.out.println("Path exists: "+path.toString());
+     
+     byte[] webPage = Files.readAllBytes(Paths.get(path.toString()));
+     String webPageSize = "Content-Length: "+webPage.length+"\r\n";
+     
+     String contentType = "Content-Type: "+Files.probeContentType(Paths.get(path.toString()))+"\r\n";
+     
+     os.write("HTTP/1.1 200 OK\r\n".getBytes());
+     os.write("Server: My WebServer\r\n".getBytes());
+     os.write(contentType.getBytes());
+     os.write(webPageSize.getBytes());
+     os.write("\r\n".getBytes());
+     
+     os.write(webPage);
+     
+
+     
+     
+    }
+    else {
+     String errorMessage = "<html><body><h1>ERROR: 404</h1><p>Path "+request.getResourceName().toString()+" not found.</p></body></html>";
+     
+     String errorLength = "Content-Length: "+errorMessage.length()+"\r\n";
+     System.out.println("Path "+request.getResourceName()+" not found");
+     os.write("HTTP/1.1 404 Not Found\r\n".getBytes());
+     os.write("Server: My WebServer\r\n".getBytes());
+     os.write("Content-Type: text/html\r\n".getBytes());
+     os.write(errorLength.getBytes());
+     os.write("\r\n".getBytes());
+     
+     os.write(errorMessage.getBytes());
+    }
+   }
+
+   //    
+   //   }
 
    // in this simple setup all the server does in response to messages from the client is to send
    // a single ACK byte back to client - the client uses this ACK byte to test whether the 
@@ -68,7 +105,7 @@ public class WebClient extends Thread {
    //byte[] b = string.getBytes(StandardCharsets.UTF_8); // Java 7+ only
 
    //os.write(b);
-   System.out.println("WebClient: " + line); // assuming no exception, print out line received from client
+   System.out.println("WebClient: " + request.getRequest()); // assuming no exception, print out line received from client
   }
  }
 
@@ -97,8 +134,19 @@ public class WebClient extends Thread {
   }
  }
  
- private void handleGET(){
-  
- }
+// private String getStringFromFile(File file) {
+//  BufferedReader fr = new BufferedReader(new FileReader(file));
+//  StringWriter sw = new StringWriter();
+//  StringBuffer outputString;
+//  
+//  String line;
+//  while ((line = br.readLine() != null)) {
+//   sw.write(line);
+//   sw.
+//  }
+//  
+// }
+ 
+
 
 }
