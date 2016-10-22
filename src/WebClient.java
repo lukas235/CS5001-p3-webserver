@@ -61,7 +61,8 @@ public class WebClient extends Thread {
      System.out.println("Path exists: " + path.toString());
      if (path.isFile()) {
       
-      byte[] webPage = getByteFromFile(path);
+//      byte[] webPage = getByteFromFile(path);
+      byte[] webPage = Files.readAllBytes(Paths.get(path.toString()));
       
       String webPageSize = "Content-Length: " + webPage.length + "\r\n";
       String contentType = "Content-Type: " + Files.probeContentType(Paths.get(path.toString())) + "\r\n";
