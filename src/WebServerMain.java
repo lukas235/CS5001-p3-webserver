@@ -33,9 +33,13 @@ public class WebServerMain {
   
   // check if the string is a valid dir
   if (!documentRoot.isDirectory()){
+<<<<<<< HEAD
    System.out.println("Usage: java WebServerMain <document_root> <port>");
 //   System.out.println("Usage: java WebServerMain <document_root> <port>"+documentRoot.getPath().toString());
 
+=======
+   System.out.println("Usage: java WebServerMain <document_root> <port>"+documentRoot.getPath().toString());
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
    System.exit(-1);
   }
   

@@ -1,7 +1,10 @@
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+<<<<<<< HEAD
 import java.io.FileInputStream;
+=======
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +14,10 @@ import java.io.StringWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+<<<<<<< HEAD
 import java.util.Scanner;
+=======
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
 
 
 public class WebClient extends Thread {
@@ -61,8 +67,12 @@ public class WebClient extends Thread {
      System.out.println("Path exists: " + path.toString());
      if (path.isFile()) {
       
+<<<<<<< HEAD
       byte[] webPage = getByteFromFile(path);
       
+=======
+      byte[] webPage = Files.readAllBytes(Paths.get(path.toString()));
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
       String webPageSize = "Content-Length: " + webPage.length + "\r\n";
       String contentType = "Content-Type: " + Files.probeContentType(Paths.get(path.toString())) + "\r\n";
       os.write("HTTP/1.1 200 OK\r\n".getBytes());
@@ -70,7 +80,10 @@ public class WebClient extends Thread {
       os.write(contentType.getBytes());
       os.write(webPageSize.getBytes());
       os.write("\r\n".getBytes());
+<<<<<<< HEAD
       
+=======
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
       os.write(webPage);
      }
      
@@ -87,6 +100,7 @@ public class WebClient extends Thread {
        os.write(contentType.getBytes());
        os.write(webPageSize.getBytes());
        os.write("\r\n".getBytes());
+<<<<<<< HEAD
        
        os.write(webPage);
       }
@@ -109,6 +123,15 @@ public class WebClient extends Thread {
      
      os.write(errorMessage.getBytes());
     }
+=======
+       os.write(webPage);
+      }
+     }
+         
+    }
+    
+    
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
     
     
     else {
@@ -132,8 +155,13 @@ public class WebClient extends Thread {
    // in this simple setup all the server does in response to messages from the client is to send
    // a single ACK byte back to client - the client uses this ACK byte to test whether the 
    // connection to this server is still live, if not the client shuts down cleanly //TODO sendalive
+<<<<<<< HEAD
 //   Byte isAlive = 1;
 //   os.write(isAlive);
+=======
+   Byte isAlive = 1;
+   os.write(isAlive);
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
 
    //String string = "Halt's Maul\n";
 
@@ -171,6 +199,7 @@ public class WebClient extends Thread {
   }
  }
  
+<<<<<<< HEAD
  private byte[] getByteFromFile(File file) {
   byte[] buffer = new byte[(int)file.length()];
   InputStream is = null;
@@ -195,6 +224,9 @@ public class WebClient extends Thread {
   }
   
   
+=======
+// private String getStringFromFile(File file) {
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
 //  BufferedReader fr = new BufferedReader(new FileReader(file));
 //  StringWriter sw = new StringWriter();
 //  StringBuffer outputString;
@@ -204,8 +236,13 @@ public class WebClient extends Thread {
 //   sw.write(line);
 //   sw.
 //  }
+<<<<<<< HEAD
   
 
+=======
+//  
+// }
+>>>>>>> 274615fc11802cf10c8726d92dc7bcc841a46422
  
 
 
