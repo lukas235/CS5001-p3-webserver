@@ -6,12 +6,12 @@ public class WebServerMain {
   File documentRoot = null;
   int port = 0;
 
-  if (args.length < 2) {
+  if (args.length != 2) { // TODO: check ports and so on
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
 
-  if (args[0].equals(null)) {
+  if (args[0].equals(null) || args[0] == null) {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
@@ -43,6 +43,8 @@ public class WebServerMain {
   System.out.println(documentRoot.getPath());
 
   WebServer ws = new WebServer(documentRoot, port);
+  
+
 
  }
 

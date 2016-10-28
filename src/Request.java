@@ -1,3 +1,5 @@
+
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.regex.Matcher;
@@ -8,25 +10,47 @@ public class Request {
  private String requestType;
  private File resourceName;
  private String protocolVersion;
- private boolean isValidHttp = false;
+ private boolean isImplemented;
+ private boolean isFound;
+
  private Pattern p;
  private Matcher m;
 
- public Request(String request) {
+ public Request(String request, File documentRoot) {
   this.request = request;
-  p = Pattern.compile("^(GET|HEAD)[ *]([^ ]*)[ *](HTTP*.+$)");
+  p = Pattern.compile("^(GET|get)\\s+(\\S+)\\s+(HTTP.*)$");
   m = p.matcher(request);
 
   if (!m.matches()) {
-   isValidHttp = false;
+   isImplemented = false;
   }
   else {
-   isValidHttp = true;
-   System.out.println("Match");
+   isImplemented = true;
 
    requestType = m.group(1);
    resourceName = new File(m.group(2));
    protocolVersion = m.group(3);
+
+   File filepath = new File(documentRoot.toString() + getResourceName().toString());
+
+   if (filepath.isFile()) {
+    isFound = true;
+    resourceName = filepath;
+   }
+   else if (documentRoot.isDirectory()) {
+    filepath = new File(filepath.toString() + "/index.html");
+
+    if (filepath.isFile()) {
+     isFound = true;
+     resourceName = filepath;
+    }
+    else {
+     isFound=false;
+    }
+   }
+   else {
+    isFound = false;
+   }
   }
  }
 
@@ -46,12 +70,12 @@ public class Request {
   return protocolVersion;
  }
 
- public boolean isValidHttp() {
-  return isValidHttp;
+ public boolean isImplemented() {
+  return isImplemented;
  }
 
- public boolean isValidRequest(String request) {
-  return isValidHttp;
+ public boolean isFound() {
+  return isFound;
  }
 
 }
