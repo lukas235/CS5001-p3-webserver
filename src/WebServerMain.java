@@ -1,7 +1,16 @@
 import java.io.File;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class WebServerMain.
+ */
 public class WebServerMain {
 
+ /**
+  * The main method.
+  *
+  * @param args the arguments
+  */
  public static void main(String[] args) {
   File documentRoot = null;
   int port = 0;
@@ -34,14 +43,9 @@ public class WebServerMain {
   // check if the string is a valid dir
   if (!documentRoot.isDirectory()){
    System.out.println("Usage: java WebServerMain <document_root> <port>");
-//   System.out.println("Usage: java WebServerMain <document_root> <port>"+documentRoot.getPath().toString());
-
    System.exit(-1);
   }
   
-  System.out.println(port);
-  System.out.println(documentRoot.getPath());
-
   WebServer ws = new WebServer(documentRoot, port);
   
 

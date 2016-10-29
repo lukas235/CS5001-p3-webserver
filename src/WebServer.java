@@ -4,25 +4,33 @@ import java.net.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class WebServer.
+ */
 public class WebServer {
 
- private ServerSocket ss; // listen for client connection requests on this server socket
- private ExecutorService executor;
+ /** The ss. */
+ private ServerSocket ss;
 
+ /**
+  * Instantiates a new web server.
+  *
+  * @param documentRoot the document root
+  * @param port the port
+  */
  public WebServer(File documentRoot, int port) {
   try {
    ss = new ServerSocket(port);
-   System.out.println("-- WebServer started. Listening on port " + port + ". --");
-   Logger logger = new Logger();
-   logger.log("Server has been started");
+   System.out.println("WebServer started. Listening on port " + port + ". Root directory is " + documentRoot.toString());
 
    while (true) {
-    Socket con = ss.accept(); // wait until client requests a connection, then returns connection (socket)
-    System.out.println("WebServer received new connection request from " + con.getInetAddress());
+    Socket con = ss.accept();
+    System.out.println("WebServer received a new connection request from " + con.getInetAddress());
 
-    WebClient ch = new WebClient(documentRoot, con); // create new handler for the connection
+    ClientHandler ch = new ClientHandler(documentRoot, con);
 
-    ch.start(); // handle the client request
+    ch.start();
    }
   }
   catch (IOException ioe) {
