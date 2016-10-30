@@ -73,21 +73,21 @@ public class ClientHandler extends Thread {
   RequestChecker requestChecker = new RequestChecker(msg, documentRoot);
 
   switch (requestChecker.getResponseType()) {
-   case Configuration.IS_OK: { // Send 200
+   case Configuration.IS_OK: // Send 200
     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
     respondOk(requestChecker);
     break;
-   }
-   case Configuration.IS_NOT_FOUND: { // Send 404
+
+   case Configuration.IS_NOT_FOUND: // Send 404
     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
     respondNotFound(requestChecker);
     break;
-   }
-   case Configuration.IS_NOT_IMPLEMENTED: { // Send 501
+
+   case Configuration.IS_NOT_IMPLEMENTED: // Send 501
     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
     respondNotImplemented(requestChecker);
     break;
-   }
+
    default: // Send nothing, but log
     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
     break;

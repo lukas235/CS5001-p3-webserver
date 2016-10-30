@@ -11,7 +11,7 @@ public class RequestChecker {
  /** Request string that came from the client. */
  private String request;
 
- /** Name of the requested Resource (File or Path) */
+ /** Name of the requested Resource (File or Path). */
  private File resourceName;
 
  /** Root directory of the server. */
