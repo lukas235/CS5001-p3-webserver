@@ -42,7 +42,7 @@ public class WebServerMain {
   }
 
   // Check if the string is a valid directory.
-  if (!documentRoot.isDirectory()){
+  if (!documentRoot.isDirectory()) {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
@@ -50,9 +50,6 @@ public class WebServerMain {
   // Start the webserver.
   WebServer ws = new WebServer(documentRoot, port);
 
-
-
  }
-
 
 }

@@ -72,41 +72,42 @@ public class ClientHandler extends Thread {
 
   if ((msg != null) && !msg.equals(null)) {
 
-   Request request = new Request(msg, documentRoot);
+   RequestChecker requestChecker = new RequestChecker(msg, documentRoot);
 
-   switch (request.getType()) {
+   switch (requestChecker.getResponseType()) {
     case Configuration.isOk: { // Send 200
-     logger.logValid(con.getInetAddress() + ": " + request.toString());
-     respondOk(request);
+     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
+     respondOk(requestChecker);
      break;
     }
     case Configuration.isNotFound: { // Send 404
-     logger.logValid(con.getInetAddress() + ": " + request.toString());
-     respondNotFound(request);
+     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
+     respondNotFound(requestChecker);
      break;
     }
     case Configuration.isNotImplemented: { // Send 501
-     logger.logInvalid(con.getInetAddress() + ": " + request.toString());
-     respondNotImplemented(request);
+     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
+     respondNotImplemented(requestChecker);
      break;
     }
     default: // Send nothing, but log
-     logger.logInvalid(con.getInetAddress() + ": " + request.toString());
+     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
      break;
    }
   }
-  
-  // Close the connection!
+
+  // Close the connection after the request has been sent!
   closeClientConnection();
  }
 
- /** 
-  * Run method
+ /**
+  * Run method for multi-threading. Executes the handle() method and closes the client connection on error.
+  *
   * @see java.lang.Thread#run()
   */
  @Override
  public void run() {
-  System.out.println("New ClientHandler Thread started");
+  System.out.println("New ClientHandler thread started!");
   try {
    handle();
   }
@@ -117,7 +118,7 @@ public class ClientHandler extends Thread {
  }
 
  /**
-  * Close client connection.
+  * Close client connection for clean-up purposes.
   */
  public void closeClientConnection() {
   System.out.println("Closing ClientHandler connection.");
@@ -129,53 +130,63 @@ public class ClientHandler extends Thread {
    System.out.println("ClientHandler connection successfully closed.");
   }
   catch (IOException ioe) {
-   System.out.println("Error while closing ClientHandler connection: " + ioe.getMessage());
+   System.out.println("ClientHandler: " + ioe.getMessage());
   }
  }
 
  /**
-  * Write OK.
+  * Create HTTP OK (200) response and send it to the client.
+  * The message consists of:
+  * <header>
+  * <cr><lf>
+  * <content>
   *
-  * @param request the request
+  * @param request the request from the client
   * @throws IOException Signals that an I/O exception has occurred.
   */
- private void respondOk(Request request) throws IOException {
+ private void respondOk(RequestChecker request) throws IOException {
   File file = request.getResourceName();
-  byte[] body = Files.readAllBytes(Paths.get(file.toString()));
+  byte[] content = Files.readAllBytes(Paths.get(file.toString()));
   StringBuffer sb = new StringBuffer();
 
   // Append HTTP Header
-  sb.append(Configuration.httpOk + "\r\n");
+  sb.append("HTTP/1.1 200 OK" + "\r\n");
   sb.append(Configuration.serverName + "\r\n");
-  sb.append("Content-Length: " + body.length + "\r\n");
+  sb.append("Content-Length: " + content.length + "\r\n");
   sb.append("Content-Type: " + Files.probeContentType(Paths.get(file.toString())) + "\r\n");
-  
+
   // Append CRLF
   sb.append("\r\n");
 
   byte[] header = sb.toString().getBytes();
 
-  byte[] response = new byte[header.length + body.length];
+  byte[] response = new byte[header.length + content.length];
 
   for (int i = 0; i < response.length; ++i) {
-   response[i] = i < header.length ? header[i] : body[i - header.length];
+   response[i] = i < header.length ? header[i] : content[i - header.length];
   }
+
+  // Write to output stream
   os.write(response);
  }
 
  /**
-  * Write not found.
+  * Create HTTP Not Found (404) response and send it to the client.
+  * The message consists of:
+  * <header>
+  * <cr><lf>
+  * <content>
   *
   * @param request the request
   * @throws IOException Signals that an I/O exception has occurred.
   */
- private void respondNotFound(Request request) throws IOException {
+ private void respondNotFound(RequestChecker request) throws IOException {
   String errorMessage = "<!doctype html><html lang = \"en\"><head><meta charset=\"utf-8\"><title>Titel</title></head><body><h1>ERROR: 404</h1><p>Path "
     + request.getResourceName().toString() + " not found.</p></body></html>";
   StringBuffer sb = new StringBuffer();
 
   // Append HTTP Header
-  sb.append(Configuration.httpNotFound + "\r\n");
+  sb.append("HTTP/1.1 404 Not Found" + "\r\n");
   sb.append(Configuration.serverName + "\r\n");
   sb.append("Content-Type: text/html\r\n");
   sb.append("Content-Length: " + errorMessage.length() + "\r\n");
@@ -183,28 +194,33 @@ public class ClientHandler extends Thread {
   // Append CRLF
   sb.append("\r\n");
 
-  // Append 404 Body
+  // Append 404 Content
   sb.append(errorMessage);
 
+  // Write to output stream
   os.write(sb.toString().getBytes());
  }
 
  /**
-  * Write not implemented.
+  * Create HTTP Not Implemented (501) response and send it to the client.
+  * The message consists of:
+  * <header>
+  * <cr><lf>
   *
   * @param request the request
   * @throws IOException Signals that an I/O exception has occurred.
   */
- private void respondNotImplemented(Request request) throws IOException {
+ private void respondNotImplemented(RequestChecker request) throws IOException {
   StringBuffer sb = new StringBuffer();
 
   // Append HTTP Header
-  sb.append(Configuration.httpNotImplemented + "\r\n");
+  sb.append("HTTP/1.1 501 Not Implemented" + "\r\n");
   sb.append(Configuration.serverName + "\r\n");
 
   // Append CRLF
   sb.append("\r\n");
 
+  // Write to output stream
   os.write(sb.toString().getBytes());
  }
 

@@ -5,19 +5,20 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class Logger.
+ * The Logger can log valid and invalid requests and write them to separate files.
+ * The two files can be specified in the Configuration.java file.
+ *
+ * The logger also adds a timestamp and the IP adress from where the request came.
  */
 public class Logger {
 
  /**
-  * Log valid.
+  * Log valid requests in Configuration.logFileValid.
   *
-  * @param event the event
+  * @param request the request that shall be logged
   */
- public synchronized void logValid(String event) {
-  System.out.println("log valid");
+ public synchronized void logValid(String request) {
   try {
    File logFile = new File(Configuration.logFileValid);
 
@@ -29,13 +30,12 @@ public class Logger {
    Date date = new Date();
    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 
-   event = sdf.format(date) + ": " + event;
+   request = sdf.format(date) + ": " + request;
 
    BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));
-   bw.append(event);
+   bw.append(request);
    bw.newLine();
    bw.close();
-   System.out.println("CLosed valid");
   }
   catch (IOException e) {
    System.out.println("Logger: " + e.getMessage());
@@ -43,12 +43,11 @@ public class Logger {
  }
 
  /**
-  * Log invalid.
+  * Log invalid requests in Configuration.logFileInvValid.
   *
-  * @param event the event
+  * @param request the request that shall be logged
   */
  public synchronized void logInvalid(String event) {
-  System.out.println("log invalid");
   try {
    File logFile = new File(Configuration.logFileInvalid);
 
@@ -66,7 +65,6 @@ public class Logger {
    bw.append(event);
    bw.newLine();
    bw.close();
-   System.out.println("CLosed invalid");
 
   }
   catch (IOException e) {
