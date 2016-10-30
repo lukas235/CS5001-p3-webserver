@@ -1,26 +1,27 @@
 import java.io.File;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class WebServerMain.
+ * WebServerMain checks for the right command line arguments and starts the server.
  */
 public class WebServerMain {
 
  /**
-  * The main method.
+  * The main method checks the command line arguments and starts the server.
   *
-  * @param args the arguments
+  * @param args arguments from command-line.
   */
  public static void main(String[] args) {
   File documentRoot = null;
   int port = 0;
 
-  if (args.length != 2) { // TODO: check ports and so on
+  // Check number of arguments.
+  if (args.length != 2) {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
 
-  if (args[0].equals(null) || args[0] == null) {
+  // Check if not equals 0.
+  if (args[0].equals(null) || (args[0] == null) || args[1].equals(null) || (args[1] == null)) {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
@@ -33,21 +34,22 @@ public class WebServerMain {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
-  
-  // check if port is valid
-  if (port < 1 || port > Integer.MAX_VALUE) {
+
+  // Check if port is valid.
+  if ((port < 1) || (port > Integer.MAX_VALUE)) {
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
-  
-  // check if the string is a valid dir
+
+  // Check if the string is a valid directory.
   if (!documentRoot.isDirectory()){
    System.out.println("Usage: java WebServerMain <document_root> <port>");
    System.exit(-1);
   }
-  
+
+  // Start the webserver.
   WebServer ws = new WebServer(documentRoot, port);
-  
+
 
 
  }

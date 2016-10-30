@@ -2,7 +2,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,7 +20,7 @@ public class Logger {
   System.out.println("log valid");
   try {
    File logFile = new File(Configuration.logFileValid);
-   
+
    if (!logFile.exists()) {
     System.out.println("File does not exist. Creating new File.");
     logFile.createNewFile();
@@ -29,7 +28,7 @@ public class Logger {
 
    Date date = new Date();
    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-   
+
    event = sdf.format(date) + ": " + event;
 
    BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));
@@ -42,7 +41,7 @@ public class Logger {
    System.out.println("Logger: " + e.getMessage());
   }
  }
- 
+
  /**
   * Log invalid.
   *
@@ -52,7 +51,7 @@ public class Logger {
   System.out.println("log invalid");
   try {
    File logFile = new File(Configuration.logFileInvalid);
-   
+
    if (!logFile.exists()) {
     System.out.println("File does not exist. Creating new File.");
     logFile.createNewFile();
@@ -60,7 +59,7 @@ public class Logger {
 
    Date date = new Date();
    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
-   
+
    event = sdf.format(date) + ": " + event;
 
    BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));
@@ -74,5 +73,5 @@ public class Logger {
    System.out.println("Logger: " + e.getMessage());
   }
  }
- 
+
 }

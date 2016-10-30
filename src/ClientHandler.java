@@ -1,47 +1,53 @@
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-// TODO: Auto-generated Javadoc
+import com.sun.corba.se.impl.ior.ByteBuffer;
+
 /**
- * The Class ClientHandler.
+ * The ClientHandler is responsible for handling the client's requests.
+ * It supports and responds to correct GET requests.
+ * It returns HTML documents requested by a client.
+ * It also returns binary files and images such as GIF, JPEG and PNG.
+ * It responds with appropriate error messages when non-existent services or resources are requested.
+ * It is multi-threaded and therefore supports more than one client connection at a time.
+ * Each time a request is made it calls the logger in order to log it to a file.
+ * If an invalid request is made it is logged to a separate file.
  */
 public class ClientHandler extends Thread {
 
- /** The con. */
+ /** Client Socket. */
  private Socket con;
- 
- /** The is. */
+
+ /** InputStream reads the client's requests. */
  private InputStream is;
- 
- /** The os. */
+
+ /** OutputStream responds to the client. */
  private OutputStream os;
- 
- /** The br. */
+
+ /** A BufferedReader is needed for reading the requested files. */
  private BufferedReader br;
- 
- /** The document root. */
+
+ /** Root directory of the server. */
  private File documentRoot;
- 
- /** The logger. */
+
+ /** Logs valid and invalid requests. */
  private Logger logger;
 
  /**
   * Instantiates a new client handler.
   *
-  * @param documentRoot the document root
-  * @param con the con
+  * @param documentRoot te root directory of the server
+  * @param con Client Socket
   */
  public ClientHandler(File documentRoot, Socket con) {
   this.documentRoot = documentRoot;
@@ -61,14 +67,14 @@ public class ClientHandler extends Thread {
  }
 
  /**
-  * Handle.
+  * Handles the client's connection. 
   *
   * @throws IOException Signals that an I/O exception has occurred.
   */
  private void handle() throws IOException {
   String msg = br.readLine();
 
-  if (msg != null && !msg.equals(null)) {
+  if ((msg != null) && !msg.equals(null)) {
 
    Request request = new Request(msg, documentRoot);
 
@@ -96,9 +102,11 @@ public class ClientHandler extends Thread {
   closeClientConnection();
  }
 
- /* (non-Javadoc)
+ /** 
+  * Run method
   * @see java.lang.Thread#run()
   */
+ @Override
  public void run() {
   System.out.println("New ClientHandler Thread started");
   try {
@@ -134,22 +142,44 @@ public class ClientHandler extends Thread {
   * @throws IOException Signals that an I/O exception has occurred.
   */
  private void writeOK(Request request) throws IOException {
+  StringBuffer sb = new StringBuffer();
+
   File file = request.getResourceName();
   byte[] webPage = Files.readAllBytes(Paths.get(file.toString()));
-  String webPageSize = "Content-Length: " + webPage.length + "\r\n";
-  String contentType = "Content-Type: " + Files.probeContentType(Paths.get(file.toString())) + "\r\n";
+  //  String webPageSize = "Content-Length: " + webPage.length + "\r\n";
+  //  String contentType = "Content-Type: " + Files.probeContentType(Paths.get(file.toString())) + "\r\n";
+
+  //Write HTTP Header
+  sb.append(Configuration.httpOk + "\r\n");
+  sb.append(Configuration.serverName + "\r\n");
+  sb.append("Content-Length: " + webPage.length + "\r\n");
+  sb.append("Content-Type: " + Files.probeContentType(Paths.get(file.toString())) + "\r\n");
+  //Write CRLF
+  sb.append("\r\n");
+  
+  byte [] header = sb.toString().getBytes();
+  
+  byte[] response = new byte[header.length+webPage.length];
+  
+  for (int i = 0; i < response.length; ++i)
+  {
+      response[i] = i < header.length ? header[i] : webPage[i - header.length];
+  }
+  
+  os.write(response);
+  
 
   // Write HTTP Header
-  os.write((Configuration.httpOk + "\r\n").getBytes()); // <protocol> <responseCode> <cr><lf>
-  os.write((Configuration.serverName + "\r\n").getBytes()); // <server>
-  os.write(contentType.getBytes()); // 
-  os.write(webPageSize.getBytes());
+  //  os.write((Configuration.httpOk + "\r\n").getBytes()); // <protocol> <responseCode> <cr><lf>
+  //  os.write((Configuration.serverName + "\r\n").getBytes()); // <server>
+  //  os.write(contentType.getBytes()); //
+  //  os.write(webPageSize.getBytes());
 
   // Write CRLF
-  os.write("\r\n".getBytes());
+//  os.write("\r\n".getBytes());
 
   // Write 200 Body
-  os.write(webPage);
+//  os.write(webPage);
  }
 
  /**

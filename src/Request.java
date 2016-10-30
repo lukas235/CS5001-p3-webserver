@@ -8,34 +8,34 @@ import java.util.regex.Pattern;
  * The Class Request.
  */
 public class Request {
- 
+
  /** The request. */
  private String request;
- 
+
  /** The request type. */
  private String requestType;
- 
+
  /** The resource name. */
  private File resourceName;
- 
+
  /** The protocol version. */
  private String protocolVersion;
- 
+
  /** The document root. */
  private File documentRoot;
- 
+
  /** The type. */
  private int type = -1;
 
  /** The http pattern. */
  private Pattern httpPattern;
- 
+
  /** The get pattern. */
  private Pattern getPattern;
- 
+
  /** The http matcher. */
  private Matcher httpMatcher;
- 
+
  /** The get matcher. */
  private Matcher getMatcher;
 
@@ -65,7 +65,7 @@ public class Request {
    if (!httpMatcher.matches()) { // No HTTP request
     return Configuration.isNoHttp;
    }
-   
+
    else {
     requestType = httpMatcher.group(1);
     resourceName = new File(httpMatcher.group(2));
@@ -133,7 +133,7 @@ public class Request {
   return protocolVersion;
  }
 
- /* (non-Javadoc)
+ /**
   * @see java.lang.Object#toString()
   */
  @Override
