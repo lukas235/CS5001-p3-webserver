@@ -70,30 +70,27 @@ public class ClientHandler extends Thread {
  private void handle() throws IOException {
   String msg = br.readLine();
 
-  if ((msg != null) && !msg.equals(null)) {
+  RequestChecker requestChecker = new RequestChecker(msg, documentRoot);
 
-   RequestChecker requestChecker = new RequestChecker(msg, documentRoot);
-
-   switch (requestChecker.getResponseType()) {
-    case Configuration.isOk: { // Send 200
-     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
-     respondOk(requestChecker);
-     break;
-    }
-    case Configuration.isNotFound: { // Send 404
-     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
-     respondNotFound(requestChecker);
-     break;
-    }
-    case Configuration.isNotImplemented: { // Send 501
-     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
-     respondNotImplemented(requestChecker);
-     break;
-    }
-    default: // Send nothing, but log
-     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
-     break;
+  switch (requestChecker.getResponseType()) {
+   case Configuration.IS_OK: { // Send 200
+    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
+    respondOk(requestChecker);
+    break;
    }
+   case Configuration.IS_NOT_FOUND: { // Send 404
+    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
+    respondNotFound(requestChecker);
+    break;
+   }
+   case Configuration.IS_NOT_IMPLEMENTED: { // Send 501
+    logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
+    respondNotImplemented(requestChecker);
+    break;
+   }
+   default: // Send nothing, but log
+    logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
+    break;
   }
 
   // Close the connection after the request has been sent!
@@ -151,7 +148,7 @@ public class ClientHandler extends Thread {
 
   // Append HTTP Header
   sb.append("HTTP/1.1 200 OK" + "\r\n");
-  sb.append(Configuration.serverName + "\r\n");
+  sb.append(Configuration.SERVER_NAME + "\r\n");
   sb.append("Content-Length: " + content.length + "\r\n");
   sb.append("Content-Type: " + Files.probeContentType(Paths.get(file.toString())) + "\r\n");
 
@@ -187,7 +184,7 @@ public class ClientHandler extends Thread {
 
   // Append HTTP Header
   sb.append("HTTP/1.1 404 Not Found" + "\r\n");
-  sb.append(Configuration.serverName + "\r\n");
+  sb.append(Configuration.SERVER_NAME + "\r\n");
   sb.append("Content-Type: text/html\r\n");
   sb.append("Content-Length: " + errorMessage.length() + "\r\n");
 
@@ -215,7 +212,7 @@ public class ClientHandler extends Thread {
 
   // Append HTTP Header
   sb.append("HTTP/1.1 501 Not Implemented" + "\r\n");
-  sb.append(Configuration.serverName + "\r\n");
+  sb.append(Configuration.SERVER_NAME + "\r\n");
 
   // Append CRLF
   sb.append("\r\n");

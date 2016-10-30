@@ -14,13 +14,13 @@ import java.util.Date;
 public class Logger {
 
  /**
-  * Log valid requests in Configuration.logFileValid.
+  * Log valid requests in Configuration.LOGFILE_VALID.
   *
   * @param request the request that shall be logged
   */
  public synchronized void logValid(String request) {
   try {
-   File logFile = new File(Configuration.logFileValid);
+   File logFile = new File(Configuration.LOGFILE_VALID);
 
    if (!logFile.exists()) {
     System.out.println("File does not exist. Creating new File.");
@@ -47,9 +47,9 @@ public class Logger {
   *
   * @param request the request that shall be logged
   */
- public synchronized void logInvalid(String event) {
+ public synchronized void logInvalid(String request) {
   try {
-   File logFile = new File(Configuration.logFileInvalid);
+   File logFile = new File(Configuration.LOGFILE_INVALID);
 
    if (!logFile.exists()) {
     System.out.println("File does not exist. Creating new File.");
@@ -59,10 +59,10 @@ public class Logger {
    Date date = new Date();
    SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 
-   event = sdf.format(date) + ": " + event;
+   request = sdf.format(date) + ": " + request;
 
    BufferedWriter bw = new BufferedWriter(new FileWriter(logFile, true));
-   bw.append(event);
+   bw.append(request);
    bw.newLine();
    bw.close();
 

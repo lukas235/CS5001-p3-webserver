@@ -44,44 +44,49 @@ public class RequestChecker {
   * Gets the appropriate response type to the request.
   *
   * @return 0, if the request could not be recognized as a valid HTTP request.
-  * @return 501, if the request has the HTTP structure, but is not implemented on the server.
-  * @return 404, if the request is valid GET, but the requested resource (File/Path) was not found.
-  * @return 200, if valid GET and the resource could be found.
+  * 501, if the request has the HTTP structure, but is not implemented on the server.
+  * 404, if the request is valid GET, but the requested resource (File/Path) was not found.
+  * 200, if valid GET and the resource could be found.
   */
  public int getResponseType() {
+
+  if ((request == null) || request.equals(null)) {
+   return Configuration.IS_NO_HTTP;
+  }
+
   httpPattern = Pattern.compile("^([A-Z]+)\\s(\\S+)\\s(HTTP.*)$");
   getPattern = Pattern.compile("^(GET)\\s(\\S+)\\s(HTTP.*)$");
   httpMatcher = httpPattern.matcher(request);
   getMatcher = getPattern.matcher(request);
 
   if (!httpMatcher.matches()) { // No HTTP request
-   return Configuration.isNoHttp;
+   return Configuration.IS_NO_HTTP;
   }
 
   else {
    resourceName = new File(httpMatcher.group(2));
 
    if (!getMatcher.matches()) { // No GET request / Unknown HTTP request
-    return Configuration.isNotImplemented;
+    return Configuration.IS_NOT_IMPLEMENTED;
    }
    else {
     File filePath = new File(documentRoot.toString() + getMatcher.group(2).toString());
     if (filePath.isFile()) { // File found
      resourceName = filePath;
-     return Configuration.isOk;
+     return Configuration.IS_OK;
     }
     else if (filePath.isDirectory()) { // Try to find an index.html, if only the directory was requested
      filePath = new File(filePath.toString() + "/index.html");
      if (filePath.isFile()) {
       resourceName = filePath;
-      return Configuration.isOk;
+      return Configuration.IS_OK;
      }
      else { // No index.html was not found in the directory
-      return Configuration.isNotFound;
+      return Configuration.IS_NOT_FOUND;
      }
     }
     else { // No File and no directory were found
-     return Configuration.isNotFound;
+     return Configuration.IS_NOT_FOUND;
     }
    }
   }
