@@ -43,7 +43,7 @@ public class Logger {
  }
 
  /**
-  * Log invalid requests in Configuration.logFileInvValid.
+  * Log invalid requests in Configuration.LOGFILE_INVALID.
   *
   * @param request the request that shall be logged
   */

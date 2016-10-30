@@ -74,18 +74,18 @@ public class ClientHandler extends Thread {
 
   switch (requestChecker.getResponseType()) {
    case Configuration.IS_OK: // Send 200
-    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
     respondOk(requestChecker);
+    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
     break;
 
    case Configuration.IS_NOT_FOUND: // Send 404
-    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
     respondNotFound(requestChecker);
+    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
     break;
 
    case Configuration.IS_NOT_IMPLEMENTED: // Send 501
-    logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
     respondNotImplemented(requestChecker);
+    logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
     break;
 
    default: // Send nothing, but log
