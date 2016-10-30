@@ -51,7 +51,7 @@ public class RequestChecker {
  public int getResponseType() {
 
   if ((request == null) || request.equals(null)) {
-   return Configuration.IS_NO_HTTP;
+   return Configuration.IS_BAD_REQUEST;
   }
 
   httpPattern = Pattern.compile("^([A-Z]+)\\s(\\S+)\\s(HTTP.*)$");
@@ -60,7 +60,7 @@ public class RequestChecker {
   getMatcher = getPattern.matcher(request);
 
   if (!httpMatcher.matches()) { // No HTTP request
-   return Configuration.IS_NO_HTTP;
+   return Configuration.IS_BAD_REQUEST;
   }
 
   else {

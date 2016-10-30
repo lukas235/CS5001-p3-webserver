@@ -22,11 +22,12 @@ public class WebServer {
   try {
    ss = new ServerSocket(port);
    System.out.println(Configuration.SERVER_NAME + " started. Listening on port " + port + ". Root directory is "
-     + documentRoot.toString());
+     + documentRoot.toString() + ".");
 
    while (true) {
     Socket con = ss.accept();
-    System.out.println(Configuration.SERVER_NAME + " received a new connection request from " + con.getInetAddress());
+    System.out
+      .println(Configuration.SERVER_NAME + " received a new connection request from " + con.getInetAddress() + ".");
 
     ClientHandler ch = new ClientHandler(documentRoot, con);
 

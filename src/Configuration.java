@@ -13,7 +13,7 @@ public abstract class Configuration {
  public static final String LOGFILE_INVALID = "invalid_requests.log";
 
  /** The code for requests, which are no valid HTTP. */
- public static final int IS_NO_HTTP = 0;
+ public static final int IS_BAD_REQUEST = 400;
 
  /** The code for requests, which are not implemented on the server. */
  public static final int IS_NOT_IMPLEMENTED = 501;

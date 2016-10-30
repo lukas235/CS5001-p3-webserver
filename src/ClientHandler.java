@@ -84,11 +84,12 @@ public class ClientHandler extends Thread {
     break;
 
    case Configuration.IS_NOT_IMPLEMENTED: // Send 501
-    respondNotImplemented(requestChecker);
+    respondNotImplemented();
     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
     break;
 
    default: // Send nothing, but log
+    respondBadRequest();
     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
     break;
   }
@@ -104,7 +105,7 @@ public class ClientHandler extends Thread {
   */
  @Override
  public void run() {
-  System.out.println("New ClientHandler thread started!");
+  System.out.println("New ClientHandler thread started.");
   try {
    handle();
   }
@@ -204,10 +205,9 @@ public class ClientHandler extends Thread {
   * <header>
   * <cr><lf>
   *
-  * @param request the request
   * @throws IOException Signals that an I/O exception has occurred.
   */
- private void respondNotImplemented(RequestChecker request) throws IOException {
+ private void respondNotImplemented() throws IOException {
   StringBuffer sb = new StringBuffer();
 
   // Append HTTP Header
@@ -221,4 +221,25 @@ public class ClientHandler extends Thread {
   os.write(sb.toString().getBytes());
  }
 
+ /**
+  * Create HTTP Bad Request (400) response and send it to the client.
+  * The message consists of:
+  * <header>
+  * <cr><lf>
+  *
+  * @throws IOException Signals that an I/O exception has occurred.
+  */
+ private void respondBadRequest() throws IOException {
+  StringBuffer sb = new StringBuffer();
+
+  // Append HTTP Header
+  sb.append("HTTP/1.1 400 Bad Request" + "\r\n");
+  sb.append(Configuration.SERVER_NAME + "\r\n");
+
+  // Append CRLF
+  sb.append("\r\n");
+
+  // Write to output stream
+  os.write(sb.toString().getBytes());
+ }
 }
