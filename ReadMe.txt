@@ -12,7 +12,7 @@
 	This was done in the Logger class. The Class implements the two methods logValid(String request) and logInvalid(String request),
 	which are used in the ClientHandler class after the request was analyzed and an appropriate response was sent. If the server  sends a
 	200 or 404, the requests get saved in the valid log file. If the server replies with 501 or 400 (Bad request) the request was not valid HTTP, this gets logged
-	in the invalid log file.
+	in the invalid log file. All the requests are being logged with both time and IP address of the client.
 
 4 If a directory was requested, the server search for an index.html file within the folder and sends it as a response.
 	The RequestChecker additionally checks, whether the requested resource was a path (e.g. "/") and looks, if an index.html exists in this path,
