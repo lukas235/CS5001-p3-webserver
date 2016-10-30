@@ -7,11 +7,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import com.sun.corba.se.impl.ior.ByteBuffer;
 
 /**
  * The ClientHandler is responsible for handling the client's requests.
@@ -67,7 +62,8 @@ public class ClientHandler extends Thread {
  }
 
  /**
-  * Handles the client's connection. 
+  * Handles the client's connection.
+  * Depending of the request type that was sent, the server returns different responses.
   *
   * @throws IOException Signals that an I/O exception has occurred.
   */
@@ -79,26 +75,28 @@ public class ClientHandler extends Thread {
    Request request = new Request(msg, documentRoot);
 
    switch (request.getType()) {
-    case Configuration.isOk: {
+    case Configuration.isOk: { // Send 200
      logger.logValid(con.getInetAddress() + ": " + request.toString());
-     writeOK(request);
+     respondOk(request);
      break;
     }
-    case Configuration.isNotFound: {
+    case Configuration.isNotFound: { // Send 404
      logger.logValid(con.getInetAddress() + ": " + request.toString());
-     writeNotFound(request);
+     respondNotFound(request);
      break;
     }
-    case Configuration.isNotImplemented: {
-     logger.logValid(con.getInetAddress() + ": " + request.toString());
-     writeNotImplemented(request);
+    case Configuration.isNotImplemented: { // Send 501
+     logger.logInvalid(con.getInetAddress() + ": " + request.toString());
+     respondNotImplemented(request);
      break;
     }
-    default:
+    default: // Send nothing, but log
      logger.logInvalid(con.getInetAddress() + ": " + request.toString());
      break;
    }
   }
+  
+  // Close the connection!
   closeClientConnection();
  }
 
@@ -141,45 +139,28 @@ public class ClientHandler extends Thread {
   * @param request the request
   * @throws IOException Signals that an I/O exception has occurred.
   */
- private void writeOK(Request request) throws IOException {
+ private void respondOk(Request request) throws IOException {
+  File file = request.getResourceName();
+  byte[] body = Files.readAllBytes(Paths.get(file.toString()));
   StringBuffer sb = new StringBuffer();
 
-  File file = request.getResourceName();
-  byte[] webPage = Files.readAllBytes(Paths.get(file.toString()));
-  //  String webPageSize = "Content-Length: " + webPage.length + "\r\n";
-  //  String contentType = "Content-Type: " + Files.probeContentType(Paths.get(file.toString())) + "\r\n";
-
-  //Write HTTP Header
+  // Append HTTP Header
   sb.append(Configuration.httpOk + "\r\n");
   sb.append(Configuration.serverName + "\r\n");
-  sb.append("Content-Length: " + webPage.length + "\r\n");
+  sb.append("Content-Length: " + body.length + "\r\n");
   sb.append("Content-Type: " + Files.probeContentType(Paths.get(file.toString())) + "\r\n");
-  //Write CRLF
+  
+  // Append CRLF
   sb.append("\r\n");
-  
-  byte [] header = sb.toString().getBytes();
-  
-  byte[] response = new byte[header.length+webPage.length];
-  
-  for (int i = 0; i < response.length; ++i)
-  {
-      response[i] = i < header.length ? header[i] : webPage[i - header.length];
+
+  byte[] header = sb.toString().getBytes();
+
+  byte[] response = new byte[header.length + body.length];
+
+  for (int i = 0; i < response.length; ++i) {
+   response[i] = i < header.length ? header[i] : body[i - header.length];
   }
-  
   os.write(response);
-  
-
-  // Write HTTP Header
-  //  os.write((Configuration.httpOk + "\r\n").getBytes()); // <protocol> <responseCode> <cr><lf>
-  //  os.write((Configuration.serverName + "\r\n").getBytes()); // <server>
-  //  os.write(contentType.getBytes()); //
-  //  os.write(webPageSize.getBytes());
-
-  // Write CRLF
-//  os.write("\r\n".getBytes());
-
-  // Write 200 Body
-//  os.write(webPage);
  }
 
  /**
@@ -188,24 +169,24 @@ public class ClientHandler extends Thread {
   * @param request the request
   * @throws IOException Signals that an I/O exception has occurred.
   */
- private void writeNotFound(Request request) throws IOException {
+ private void respondNotFound(Request request) throws IOException {
   String errorMessage = "<!doctype html><html lang = \"en\"><head><meta charset=\"utf-8\"><title>Titel</title></head><body><h1>ERROR: 404</h1><p>Path "
     + request.getResourceName().toString() + " not found.</p></body></html>";
-  String errorLength = "Content-Length: " + errorMessage.length();
+  StringBuffer sb = new StringBuffer();
 
-  System.out.println("Path " + request.getResourceName() + " not found");
+  // Append HTTP Header
+  sb.append(Configuration.httpNotFound + "\r\n");
+  sb.append(Configuration.serverName + "\r\n");
+  sb.append("Content-Type: text/html\r\n");
+  sb.append("Content-Length: " + errorMessage.length() + "\r\n");
 
-  // Write HTTP Header
-  os.write((Configuration.httpNotFound + "\r\n").getBytes());
-  os.write((Configuration.serverName + "\r\n").getBytes());
-  os.write("Content-Type: text/html\r\n".getBytes());
-  os.write((errorLength + "\r\n").getBytes());
+  // Append CRLF
+  sb.append("\r\n");
 
-  // Write CRLF
-  os.write("\r\n".getBytes());
+  // Append 404 Body
+  sb.append(errorMessage);
 
-  // Write 404 Body
-  os.write("\r\n".getBytes());
+  os.write(sb.toString().getBytes());
  }
 
  /**
@@ -214,15 +195,17 @@ public class ClientHandler extends Thread {
   * @param request the request
   * @throws IOException Signals that an I/O exception has occurred.
   */
- private void writeNotImplemented(Request request) throws IOException {
-  System.out.println("Request " + request.getResourceName() + " not implemented");
+ private void respondNotImplemented(Request request) throws IOException {
+  StringBuffer sb = new StringBuffer();
 
-  // Write HTTP Header
-  os.write((Configuration.httpNotImplemented + "\r\n").getBytes());
-  os.write((Configuration.serverName + "\r\n").getBytes());
+  // Append HTTP Header
+  sb.append(Configuration.httpNotImplemented + "\r\n");
+  sb.append(Configuration.serverName + "\r\n");
 
-  // Write CRLF
-  os.write("\r\n".getBytes());
+  // Append CRLF
+  sb.append("\r\n");
+
+  os.write(sb.toString().getBytes());
  }
 
 }
