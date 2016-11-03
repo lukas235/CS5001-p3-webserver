@@ -5,8 +5,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The ClientHandler is responsible for handling the client's requests.
@@ -47,6 +51,12 @@ public class ClientHandler extends Thread {
  public ClientHandler(File documentRoot, Socket con) {
   this.documentRoot = documentRoot;
   this.con = con;
+  try {
+   con.setSoTimeout(10000);
+  }
+  catch (SocketException e) {
+   System.out.println("ClientHandler: Socket timeout.");
+  }
 
   logger = new Logger();
 
@@ -68,32 +78,48 @@ public class ClientHandler extends Thread {
   * @throws IOException Signals that an I/O exception has occurred.
   */
  private void handle() throws IOException {
-  String msg = br.readLine();
+  ArrayList<String> request = new ArrayList<String>();
 
-  RequestChecker requestChecker = new RequestChecker(msg, documentRoot);
+  while (true) {
+   String msg = br.readLine();
 
-  switch (requestChecker.getResponseType()) {
-   case Configuration.IS_OK: // Send 200
-    respondOk(requestChecker);
-    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
+   if (msg == null || msg.equals(null)) {
     break;
+   }
 
-   case Configuration.IS_NOT_FOUND: // Send 404
-    respondNotFound(requestChecker);
-    logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
-    break;
+   request.add(msg);
+   System.out.println(msg);
 
-   case Configuration.IS_NOT_IMPLEMENTED: // Send 501
-    respondNotImplemented();
-    logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
+   if (msg == "\r\n" || msg.equals("\r\n") || msg.contains("\r\n") || msg.length() == 0 || request.size() > 100) {
     break;
-
-   default: // Send nothing, but log
-    respondBadRequest();
-    logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
-    break;
+   }
   }
 
+  if (request.size() > 0 && request.get(0) != null && !request.get(0).equals(null) && request.get(0).length() > 0) {
+   RequestChecker requestChecker = new RequestChecker(request.get(0), documentRoot);
+
+   switch (requestChecker.getResponseType()) {
+    case Configuration.IS_OK: // Send 200
+     respondOk(requestChecker);
+     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
+     break;
+
+    case Configuration.IS_NOT_FOUND: // Send 404
+     respondNotFound(requestChecker);
+     logger.logValid(con.getInetAddress() + ": " + requestChecker.toString());
+     break;
+
+    case Configuration.IS_NOT_IMPLEMENTED: // Send 501
+     respondNotImplemented();
+     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
+     break;
+
+    default: // Send nothing, but log
+     respondBadRequest();
+     logger.logInvalid(con.getInetAddress() + ": " + requestChecker.toString());
+     break;
+   }
+  }
   // Close the connection after the request has been sent!
   closeClientConnection();
  }
