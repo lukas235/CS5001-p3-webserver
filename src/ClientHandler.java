@@ -51,8 +51,10 @@ public class ClientHandler extends Thread {
  public ClientHandler(File documentRoot, Socket con) {
   this.documentRoot = documentRoot;
   this.con = con;
+
+  // Set time-out
   try {
-   con.setSoTimeout(10000);
+   con.setSoTimeout(Configuration.TIME_OUT);
   }
   catch (SocketException e) {
    System.out.println("ClientHandler: Socket timeout.");
@@ -90,7 +92,8 @@ public class ClientHandler extends Thread {
    request.add(msg);
    System.out.println(msg);
 
-   if (msg == "\r\n" || msg.equals("\r\n") || msg.contains("\r\n") || msg.length() == 0 || request.size() > 100) {
+   // Check for CRLF and request size
+   if (msg.length() == 0 || request.size() >= Configuration.REQUEST_LENGTH) {
     break;
    }
   }

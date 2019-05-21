@@ -24,4 +24,10 @@ public abstract class Configuration {
  /** The code for requests, which are valid HTTP and demand an existing resource. */
  public static final int IS_OK = 200;
 
+ /** Max lines the server accepts in a request. */
+ public static final int REQUEST_LENGTH = 100;
+
+ /** Connection time-out in milliseconds. */
+ public static final int TIME_OUT = 10000;
+
 }
